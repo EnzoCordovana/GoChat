@@ -24,7 +24,7 @@ pnpm-debug.log*
 .idea/
 
 # vs-code
-.vscode/*
+.vscode/
 
 # golang
 \go.*
