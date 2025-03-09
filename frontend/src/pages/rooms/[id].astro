@@ -1,0 +1,51 @@
+---
+interface User {
+    ID: string;
+    Username: string;
+}
+
+interface Room {
+    ID: string;
+    Label: string;
+    Description: string,
+    Users: User[];
+}
+
+export async function getStaticPaths() {
+    const res = await fetch("http://localhost:8080/api/rooms");
+
+    // Vérifiez que la réponse est OK avant de tenter de l'analyser
+    if (!res.ok) {
+        throw new Error(`Erreur HTTP! Statut: ${res.status}`);
+    }
+
+    const rooms: Room[] = await res.json();
+
+    return rooms.map(room => ({
+        params: { id: room.ID }
+    }));
+}
+
+// Dans votre composant Astro
+const { id } = Astro.params;
+// Récupérer les données de la salle spécifique
+const res = await fetch(`http://localhost:8080/api/rooms/${id}`);
+
+if (!res.ok) {
+    throw new Error(`Erreur HTTP! Statut: ${res.status}`);
+}
+
+const room: Room = await res.json();
+
+---
+
+<h1>{room.Label}</h1>
+<p>{room.Description}</p>
+<ul>
+    <p>Tous les utilisateurs dans la salle :</p>
+    {
+        room.Users.map((user)=>(
+            <li>{user.Username}</li>
+        ))
+    }
+</ul>
