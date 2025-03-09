@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const res = await fetch("http://localhost:8080/api/albums");
+const albums: Albums[] = await res.json();
+
+interface Albums {
+    ID:     number,
+    Title:  string,
+    Artist: string,
+    Price:  number
+};
+
+console.table(albums);
+---
+<Layout>
+    <h1>Albums</h1>
+    <ul>
+        {
+            albums.map((album)=>(
+                <li>
+                    <p>{album.Title} - {album.Artist} - (${album.Price})</p>
+                </li>
+            ))
+        }
+    </ul>
+</Layout>
