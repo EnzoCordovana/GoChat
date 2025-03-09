@@ -1,43 +1,47 @@
-/*
- * Fait avec la doc:
- * https://go.dev/doc/tutorial/web-service-gin
- */
-
 package main
 
-// Import des blibliothèques
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-// La tructure d'un album
-type Album struct {
-	ID     string  `json:"id"`
-	Title  string  `json:"title"`
-	Artist string  `json:artist`
-	Price  float64 `json:price`
+var admin1 = User{ID: 1, Username: "BNK4970"}
+var user1 = User{ID: 2, Username: "Lux"}
+
+var rooms = []Room{
+	{ID: 1, Label: "Chill", Description: "Un espace détente pour écouter de la musique, lire ou simplement se relaxer.", Users: []User{admin1}},
+	{ID: 2, Label: "Gaming", Description: "Rejoins une partie endiablée avec tes amis et affrontez-vous dans vos jeux préférés.", Users: []User{user1}},
+	{ID: 3, Label: "Devoir", Description: "Un endroit calme pour travailler efficacement et avancer sur tes projets scolaires.", Users: []User{}},
+	{ID: 4, Label: "Débat", Description: "Exprime tes idées, écoute les arguments des autres et participe à des discussions passionnantes.", Users: []User{}},
 }
 
-// Notre slice album
-var albums = []Album{
-	{ID: "1", Title: "Blue Train", Artist: "John Coltrane", Price: 56.99},
-	{ID: "2", Title: "Jeru", Artist: "Gerry Mulligan", Price: 17.99},
-	{ID: "3", Title: "Sarah Vaughan and Clifford Brown", Artist: "Sarah Vaughan", Price: 39.99},
+func getRooms(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, rooms)
 }
 
-// Fonction pour obtenir notre slice
-func getAlbums(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, albums)
+func getRoomByID(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid room ID"})
+		return
+	}
+
+	for _, room := range rooms {
+		if room.ID == id {
+			c.IndentedJSON(http.StatusOK, room)
+			return
+		}
+	}
+
+	c.JSON(http.StatusNotFound, gin.H{"error": "Room not found"})
 }
 
 func main() {
-	// Setup du serveur
 	router := gin.Default()
-
-	// Setup des routes api
-	router.GET("/api/albums", getAlbums)
-
+	router.GET("/api/rooms", getRooms)
+	router.GET("/api/rooms/:id", getRoomByID)
 	router.Run("localhost:8080")
 }
